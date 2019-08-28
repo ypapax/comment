@@ -23,4 +23,16 @@ runca() {
   docker-compose up api
 }
 
+runcdb() {
+  build
+  docker-compose build postgres
+  docker-compose up postgres
+}
+
+testl() {
+  pushd test
+  go test -v "$@"
+  popd
+}
+
 "$@"

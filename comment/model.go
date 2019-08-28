@@ -1,16 +1,14 @@
 package comment
 
 import (
-	"github.com/ypapax/comment/page"
 	"time"
 )
 
 type Comment struct {
-	Id      string
+	Id      int
 	Text    string
-	UserID  string
-	PageID  string `sql:"page_id"`
-	Page    page.Page
+	UserID  int
+	PageID  int
 	Token   string
 	Rating  int
 	Created time.Time

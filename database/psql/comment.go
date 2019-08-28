@@ -17,32 +17,15 @@ func NewPostgresCommentRepository(db *pg.DB) comment.Repository {
 }
 
 func (r commentRepository) Insert(c *comment.Comment) error {
-	if err := func() error {
-		err := r.db.Select(c.Page)
-		if err == nil {
-			return err
-		}
-		if !notFound(err) {
-			logrus.Error(err)
-			return err
-		}
-		if err := r.db.Insert(c.Page); err != nil {
-			logrus.Error(err)
-			return err
-		}
-		return nil
-	}(); err != nil {
-		logrus.Error(err)
-		return err
-	}
 	if err := r.db.Insert(c); err != nil {
+		err := fmt.Errorf("err: %+v for inserting %+v", err, *c)
 		logrus.Error(err)
 		return err
 	}
 	return nil
 }
 
-func (r commentRepository) FindByID(id string) (*comment.Comment, error) {
+func (r commentRepository) FindByID(id int) (*comment.Comment, error) {
 	var c = comment.Comment{Id: id}
 	err := r.db.Select(&c)
 	if err != nil {
@@ -55,14 +38,14 @@ func (r commentRepository) FindByID(id string) (*comment.Comment, error) {
 	return &c, nil
 }
 
-func (r commentRepository) DeleteByID(id string) error {
+func (r commentRepository) DeleteByID(id int) error {
 	if err := r.db.Delete(comment.Comment{Id: id}); err != nil {
 		logrus.Error(err)
 		return err
 	}
 	return nil
 }
-func (r commentRepository) FindByPage(pageID string, page, limit int) ([]comment.Comment, error) {
+func (r commentRepository) FindByPage(pageID, page, limit int) ([]comment.Comment, error) {
 	values := urlfilter.Values(map[string][]string{
 		"page":  {fmt.Sprintf("%d", page)},
 		"limit": {fmt.Sprintf("%d", limit)},

@@ -29,11 +29,15 @@ func Serve(c config.Config) error {
 			logrus.Error(err)
 			return c.String(http.StatusInternalServerError, "internal server error ise879187090")
 		}
-		return c.JSON(http.StatusOK, com.Id)
+		return c.JSON(http.StatusOK, com)
 	})
 
 	e.GET("/comment/:id", func(c echo.Context) error {
-		id := c.Param("id")
+		id, err := intParam(c, "id")
+		if err != nil {
+			logrus.Error(err)
+			return c.String(http.StatusBadRequest, "bad request br989823")
+		}
 		com, err := commentService.FindByID(id)
 		if err != nil {
 			logrus.Error(err)
@@ -43,7 +47,11 @@ func Serve(c config.Config) error {
 	})
 
 	e.DELETE("/comment/:id", func(c echo.Context) error {
-		id := c.Param("id")
+		id, err := intParam(c, "id")
+		if err != nil {
+			logrus.Error(err)
+			return c.String(http.StatusBadRequest, "bad request br989823")
+		}
 		if err := commentService.DeleteByID(id); err != nil {
 			logrus.Error(err)
 			return c.String(http.StatusInternalServerError, "internal server error isd8092323")
@@ -52,9 +60,10 @@ func Serve(c config.Config) error {
 	})
 
 	e.GET("/comment/:page-id", func(c echo.Context) error {
-		pageID := c.QueryParam("page-id")
-		if len(pageID) == 0 {
-			return c.String(http.StatusBadRequest, "bad request br82i732")
+		pageID, err := intParam(c, "page-id")
+		if err != nil {
+			logrus.Error(err)
+			return c.String(http.StatusBadRequest, "bad request br989823")
 		}
 		page, limit, err := parsePaginationParams(c)
 		if err != nil {
@@ -104,4 +113,17 @@ func parsePaginationParams(c echo.Context) (page int, limit int, err error) {
 		intParams = append(intParams, int(i))
 	}
 	return intParams[0], intParams[1], nil
+}
+
+func intParam(c echo.Context, name string) (int, error) {
+	val := c.Param(name)
+	if len(val) == 0 {
+		return 0, fmt.Errorf("missing parameter %+v", name)
+	}
+	i, err := strconv.ParseInt(val, 10, 64)
+	if err != nil {
+		logrus.Error(err)
+		return 0, err
+	}
+	return int(i), err
 }
