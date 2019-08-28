@@ -1,0 +1,7 @@
+db_type: psql
+db:
+  user: postgres
+  addr: localhost:5432
+  name: comment
+api:
+  bind: 0.0.0.0:3002

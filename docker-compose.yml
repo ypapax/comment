@@ -1,0 +1,30 @@
+version: "3.5"
+
+services:
+  api:
+    container_name: api-comment
+    ports:
+      - 3002:3002/tcp
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      - CONF=/api/conf.yaml
+    networks:
+      - comment-network
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    container_name: postgres-comment
+    ports:
+      - 5432:5432/tcp
+    volumes:
+      - ./database/psql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - comment-network
+
+networks:
+  comment-network:
+  external:
+    name: comment-network
